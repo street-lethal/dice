@@ -1,8 +1,12 @@
 package src
 
-import "testing"
+import (
+	"math/big"
+	"testing"
+)
 
 func TestKeyGen(t *testing.T) {
+	largeKey, _ := new(big.Int).SetString("70810181890813363480520350", 10)
 	type args struct {
 		base     uint64
 		fileName string
@@ -10,15 +14,22 @@ func TestKeyGen(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    uint64
+		want    *big.Int
 		wantErr bool
 	}{
 		{
-			name: "0",
+			name: "small",
 			args: args{
 				20, "../data/dice_test.txt",
 			},
-			want: 6_615_175_401_215,
+			want: big.NewInt(6_615_175_401_215),
+		},
+		{
+			name: "large",
+			args: args{
+				20, "../data/many_dice_test.txt",
+			},
+			want: largeKey,
 		},
 	}
 	for _, tt := range tests {
@@ -28,7 +39,7 @@ func TestKeyGen(t *testing.T) {
 				t.Errorf("KeyGen() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if got != tt.want {
+			if got.Cmp(tt.want) != 0 {
 				t.Errorf("KeyGen() got = %v, want %v", got, tt.want)
 			}
 		})

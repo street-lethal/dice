@@ -1,5 +1,7 @@
 package src
 
+import "math/big"
+
 type StringGenerator struct {
 	chars []byte
 }
@@ -47,36 +49,38 @@ func NewStringGenerator(charKinds string) StringGenerator {
 	}
 }
 
-func (s StringGenerator) Gen(key uint64, length int) string {
-	var r int
+func (s StringGenerator) Gen(key *big.Int, length int) string {
+	var r *big.Int
 	var q = key
 	var str string
 
 	size := uint64(len(s.chars))
 
 	for i := 0; i < length; i++ {
-		r = int(q % size)
-		q /= size
+		q, r = new(big.Int).DivMod(
+			q, big.NewInt(int64(size)), new(big.Int),
+		)
 
-		str += string(s.chars[r])
+		str += string(s.chars[r.Int64()])
 	}
 
 	return str
 }
 
 func (s StringGenerator) NecessarySize(length, base int) (
-	necessarySize int, fullSize uint64,
+	necessarySize int, fullSize *big.Int,
 ) {
-	charLength := uint64(len(s.chars))
-	fullSize = 1
+	charLength := big.NewInt(int64(len(s.chars)))
+	fullSize = big.NewInt(1)
 	for i := 0; i < length; i++ {
-		fullSize *= charLength
+		fullSize.Mul(fullSize, charLength)
 	}
 
 	necessarySize = 0
-	test := uint64(1)
-	for test < fullSize {
-		test *= uint64(base)
+	test := big.NewInt(1)
+	bigBase := big.NewInt(int64(base))
+	for test.Cmp(fullSize) < 0 {
+		test.Mul(test, bigBase)
 		necessarySize++
 	}
 

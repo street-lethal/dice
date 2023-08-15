@@ -1,6 +1,7 @@
 package src
 
 import (
+	"math/big"
 	"testing"
 )
 
@@ -61,89 +62,97 @@ func TestNewStringGenerator(t *testing.T) {
 }
 
 func TestStringGenerator_Gen(t *testing.T) {
+	largeKey, _ := new(big.Int).SetString("77767574737271706766656463626160", 8)
 	tests := []struct {
 		name  string
 		chars []byte
-		key   uint64
+		key   *big.Int
 		size  int
 		want  string
 	}{
 		{
 			name:  "0",
 			chars: []byte("012"),
-			key:   0,
+			key:   big.NewInt(0),
 			size:  3,
 			want:  "000",
 		},
 		{
 			name:  "1",
 			chars: []byte("012"),
-			key:   1,
+			key:   big.NewInt(1),
 			size:  3,
 			want:  "100",
 		},
 		{
 			name:  "2",
 			chars: []byte("012"),
-			key:   2,
+			key:   big.NewInt(2),
 			size:  3,
 			want:  "200",
 		},
 		{
 			name:  "3",
 			chars: []byte("012"),
-			key:   3,
+			key:   big.NewInt(3),
 			size:  3,
 			want:  "010",
 		},
 		{
 			name:  "4",
 			chars: []byte("012"),
-			key:   4,
+			key:   big.NewInt(4),
 			size:  3,
 			want:  "110",
 		},
 		{
 			name:  "8",
 			chars: []byte("012"),
-			key:   8,
+			key:   big.NewInt(8),
 			size:  3,
 			want:  "220",
 		},
 		{
 			name:  "9",
 			chars: []byte("012"),
-			key:   9,
+			key:   big.NewInt(9),
 			size:  3,
 			want:  "001",
 		},
 		{
 			name:  "10",
 			chars: []byte("012"),
-			key:   10,
+			key:   big.NewInt(10),
 			size:  3,
 			want:  "101",
 		},
 		{
 			name:  "80",
 			chars: []byte("012"),
-			key:   80,
+			key:   big.NewInt(80),
 			size:  3,
 			want:  "222",
 		},
 		{
 			name:  "81",
 			chars: []byte("012"),
-			key:   81,
+			key:   big.NewInt(81),
 			size:  3,
 			want:  "000",
 		},
 		{
 			name:  "alphabet",
 			chars: []byte("Ab3"),
-			key:   5,
+			key:   big.NewInt(5),
 			size:  3,
 			want:  "3bA",
+		},
+		{
+			name:  "large",
+			chars: []byte("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_-"),
+			key:   largeKey,
+			size:  20,
+			want:  "mnopqrstuvwxyz_-0000",
 		},
 	}
 	for _, tt := range tests {
@@ -159,13 +168,14 @@ func TestStringGenerator_Gen(t *testing.T) {
 }
 
 func TestStringGenerator_NecessarySize(t *testing.T) {
+	large, _ := new(big.Int).SetString("3226266762397899821056", 10)
 	tests := []struct {
 		name              string
 		chars             []byte
 		length            int
 		base              int
 		wantNecessarySize int
-		wantFullSize      uint64
+		wantFullSize      big.Int
 	}{
 		{
 			name:              "0",
@@ -173,7 +183,7 @@ func TestStringGenerator_NecessarySize(t *testing.T) {
 			length:            4,
 			base:              8,
 			wantNecessarySize: 3,
-			wantFullSize:      81,
+			wantFullSize:      *big.NewInt(81),
 		},
 		{
 			name:              "0",
@@ -181,7 +191,7 @@ func TestStringGenerator_NecessarySize(t *testing.T) {
 			length:            4,
 			base:              12,
 			wantNecessarySize: 2,
-			wantFullSize:      81,
+			wantFullSize:      *big.NewInt(81),
 		},
 		{
 			name:              "0",
@@ -189,7 +199,7 @@ func TestStringGenerator_NecessarySize(t *testing.T) {
 			length:            8,
 			base:              16,
 			wantNecessarySize: 8,
-			wantFullSize:      0x100_000_000,
+			wantFullSize:      *big.NewInt(0x100_000_000),
 		},
 		{
 			name:              "0",
@@ -197,16 +207,16 @@ func TestStringGenerator_NecessarySize(t *testing.T) {
 			length:            8,
 			base:              12,
 			wantNecessarySize: 9,
-			wantFullSize:      0x100_000_000,
+			wantFullSize:      *big.NewInt(0x100_000_000),
 		},
-		//{
-		//	name:              "0",
-		//	chars:             []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"),
-		//	length:            12,
-		//	base:              20,
-		//	wantNecessarySize: 17,
-		//	wantFullSize:      3_226_266_762_397_899_821_056,
-		//},
+		{
+			name:              "0",
+			chars:             []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"),
+			length:            12,
+			base:              20,
+			wantNecessarySize: 17,
+			wantFullSize:      *large,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -217,7 +227,7 @@ func TestStringGenerator_NecessarySize(t *testing.T) {
 			if gotNecessarySize != tt.wantNecessarySize {
 				t.Errorf("NecessarySize() gotNecessarySize = %v, want %v", gotNecessarySize, tt.wantNecessarySize)
 			}
-			if gotFullSize != tt.wantFullSize {
+			if gotFullSize.Cmp(&tt.wantFullSize) != 0 {
 				t.Errorf("NecessarySize() gotFullSize = %v, want %v", gotFullSize, tt.wantFullSize)
 			}
 		})

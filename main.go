@@ -15,11 +15,14 @@ type Settings struct {
 
 func main() {
 	var settings Settings
-	bin, _ := os.ReadFile("./config/settings.json")
-	err := json.Unmarshal(bin, &settings)
+	bin, err := os.ReadFile("./config/settings.json")
 	if err != nil {
-		fmt.Println(err)
-		return
+		panic(err)
+	}
+
+	err = json.Unmarshal(bin, &settings)
+	if err != nil {
+		panic(err)
 	}
 
 	if settings.Base == 0 {
@@ -39,8 +42,7 @@ func main() {
 
 	key, err := src.KeyGen(uint64(settings.Base), "./data/dice.txt")
 	if err != nil {
-		fmt.Println(err)
-		return
+		panic(err)
 	}
 
 	g := src.NewStringGenerator(settings.CharKinds)
