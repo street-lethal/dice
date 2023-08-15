@@ -2,22 +2,21 @@ package main
 
 import (
 	"dice/src"
+	"encoding/json"
 	"fmt"
 	"os"
-
-	"gopkg.in/yaml.v3"
 )
 
 type Settings struct {
-	Base      int    `yaml:"base"`
-	Length    int    `yaml:"length"`
-	CharKinds string `yaml:"char_kinds"`
+	Base      int    `json:"base"`
+	Length    int    `json:"length"`
+	CharKinds string `json:"char_kinds"`
 }
 
 func main() {
 	var settings Settings
-	bin, _ := os.ReadFile("./config/settings.yml")
-	err := yaml.Unmarshal(bin, &settings)
+	bin, _ := os.ReadFile("./config/settings.json")
+	err := json.Unmarshal(bin, &settings)
 	if err != nil {
 		fmt.Println(err)
 		return
