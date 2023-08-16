@@ -1,5 +1,6 @@
 {
   "base": 20,
   "length": 12,
-  "char_kinds": "Aa0"
+  "char_kinds": "Aa0",
+  "forbidden_chars": "Il1O0"
 }
