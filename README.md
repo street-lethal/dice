@@ -10,7 +10,7 @@ cp data/dice.sample.txt data/dice.txt
 ## 設定
 
 ```shell
-vi config/settings.txt
+vi config/settings.json
 ```
 * `base` : 進数(サイコロの面の数)
 * `length` : ランダム文字列の文字数
