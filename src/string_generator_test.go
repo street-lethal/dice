@@ -61,6 +61,50 @@ func TestNewStringGenerator(t *testing.T) {
 	}
 }
 
+func TestStringGenerator_ForbidCharacters(t *testing.T) {
+	type fields struct {
+		chars []byte
+	}
+	type args struct {
+		chars string
+	}
+	tests := []struct {
+		name             string
+		fields           fields
+		args             args
+		wantedAfterChars []byte
+	}{
+		{
+			fields: fields{
+				chars: []byte("ABCDEFGH"),
+			},
+			args: args{
+				chars: "CFH",
+			},
+			wantedAfterChars: []byte("ABDEG"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := StringGenerator{
+				chars: tt.fields.chars,
+			}
+			s.ForbidCharacters(tt.args.chars)
+			if len(s.chars) != len(tt.wantedAfterChars) {
+				t.Errorf(
+					"ForbidCharacters() got size = %d, want %d",
+					len(s.chars), len(tt.wantedAfterChars),
+				)
+			}
+			for i := 0; i < len(tt.wantedAfterChars); i++ {
+				if s.chars[i] != tt.wantedAfterChars[i] {
+					t.Errorf("ForbidCharacters() got = %v, want %v", s.chars[i], tt.wantedAfterChars[i])
+				}
+			}
+		})
+	}
+}
+
 func TestStringGenerator_Gen(t *testing.T) {
 	largeKey, _ := new(big.Int).SetString("77767574737271706766656463626160", 8)
 	tests := []struct {

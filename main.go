@@ -8,9 +8,10 @@ import (
 )
 
 type Settings struct {
-	Base      int    `json:"base"`
-	Length    int    `json:"length"`
-	CharKinds string `json:"char_kinds"`
+	Base           int    `json:"base"`
+	Length         int    `json:"length"`
+	CharKinds      string `json:"char_kinds"`
+	ForbiddenChars string `json:"forbidden_chars"`
 }
 
 func main() {
@@ -46,6 +47,7 @@ func main() {
 	}
 
 	g := src.NewStringGenerator(settings.CharKinds)
+	g.ForbidCharacters(settings.ForbiddenChars)
 
 	necessary, full := g.NecessarySize(settings.Length, settings.Base)
 	if dice < necessary {

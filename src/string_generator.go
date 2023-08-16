@@ -49,6 +49,16 @@ func NewStringGenerator(charKinds string) StringGenerator {
 	}
 }
 
+func (s *StringGenerator) ForbidCharacters(chars string) {
+	for _, forbidden := range []byte(chars) {
+		for i, char := range s.chars {
+			if char == forbidden {
+				s.chars = append(s.chars[:i], s.chars[i+1:]...)
+			}
+		}
+	}
+}
+
 func (s StringGenerator) Gen(key *big.Int, length int) string {
 	var r *big.Int
 	var q = key
