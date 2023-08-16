@@ -40,7 +40,7 @@ func main() {
 		return
 	}
 
-	key, err := src.KeyGen(uint64(settings.Base), "./data/dice.txt")
+	key, dice, err := src.KeyGen(uint64(settings.Base), "./data/dice.txt")
 	if err != nil {
 		panic(err)
 	}
@@ -48,7 +48,12 @@ func main() {
 	g := src.NewStringGenerator(settings.CharKinds)
 
 	necessary, full := g.NecessarySize(settings.Length, settings.Base)
-	fmt.Printf("Necessary dice: %d\n", necessary)
+	if dice < necessary {
+		fmt.Printf(
+			"[ERROR] Not eough dice, needed %d, actual: %d \n", necessary, dice,
+		)
+		return
+	}
 	fmt.Printf("Full size: %d\n", full)
 
 	secret := g.Gen(key, settings.Length)
